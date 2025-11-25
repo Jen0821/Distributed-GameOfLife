@@ -63,7 +63,7 @@ This architecture is optimized for **horizontal scaling**. The final report's be
 * **Overhead Analysis:** The performance gain eventually plateaus due to the increasing overhead of network communication and Broker aggregation.
 * **Fault Consideration:** The design considers potential fault scenarios, such as handling a new Controller taking over the session or a Worker Node failing.
 
-## ▶️ Setup and Running
+## ▶️ Setup
 
 ### **Prerequisites**
 Install Go and SDL development libraries.
