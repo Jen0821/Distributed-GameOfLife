@@ -4,8 +4,6 @@ This project implements **Conway's Game of Life** as a **highly scalable, distri
 
 This system is designed to distribute the computational load of large-scale grids across several independent nodes (simulated **AWS Nodes**), demonstrating exceptional horizontal scalability.
 
----
-
 ## Overview
 
 Conway's Game of Life is a zero-player game whose evolution is determined solely by its initial state. The grid of cells evolves based on simple, local rules:
@@ -17,7 +15,13 @@ Conway's Game of Life is a zero-player game whose evolution is determined solely
 
 This project's implementation focuses on distributing these intense computations across multiple remote nodes using the Controller/Broker/Worker model to achieve massive scalability.
 
----
+## 📝 Final Coursework Report
+
+The full detailed analysis of the parallel implementation, including performance benchmarks and design rationale, is available in the final report.
+
+[![Report Cover Image: Click to Download PDF](./report.jpg)](./report.pdf)
+### Direct Link
+[Download the Full PDF Report Here](./report.pdf)
 
 ## 💡 System Architecture: Controller-Broker-Worker
 
@@ -31,7 +35,6 @@ The simulation logic is split into three main, network-connected components to m
 | **Broker (Server/Orchestrator)** | Central management point. Manages the Worker node pool, handles board slicing/distribution, and aggregates results (Aggregation) from Workers. | Go, RPC Server/Client |
 | **GOL Worker (Compute Node)** | Calculates the GOL logic for its assigned board slice. Uses **Goroutines** for internal parallelism and exchanges boundary data (**Halo**) with neighboring Workers. | Go, Goroutines, RPC Client |
 
----
 
 ## 🌟 Key Features & Implementation Highlights
 
@@ -53,8 +56,6 @@ Interactive keyboard commands are processed by the Local Controller and sent as 
 * **`q` (Quit):** Gracefully terminates the Controller client and triggers the final PGM image output.
 * **`p` (Pause/Resume):** Toggles the processing state on the remote Worker nodes.
 
----
-
 ## 📈 Performance and Scalability
 
 This architecture is optimized for **horizontal scaling**. The final report's benchmarks illustrate key performance characteristics:
@@ -62,8 +63,6 @@ This architecture is optimized for **horizontal scaling**. The final report's be
 * **Scalability Proof:** The time required to complete a fixed number of turns **significantly decreases** as the number of Worker nodes increases, demonstrating the effectiveness of the distributed approach.
 * **Overhead Analysis:** The performance gain eventually plateaus due to the increasing overhead of network communication and Broker aggregation.
 * **Fault Consideration:** The design considers potential fault scenarios, such as handling a new Controller taking over the session or a Worker Node failing.
-
----
 
 ## ▶️ Setup and Running
 
