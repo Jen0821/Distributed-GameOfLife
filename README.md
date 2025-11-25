@@ -27,7 +27,7 @@ The full detailed analysis of the parallel implementation, including performance
 
 The simulation logic is split into three main, network-connected components to maximize performance and fault tolerance potential.
 
-
+![Architecture Diagram](architecture.png)
 
 | Component | Role in Distributed System | Key Technologies |
 | :--- | :--- | :--- |
