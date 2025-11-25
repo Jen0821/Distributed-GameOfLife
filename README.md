@@ -4,6 +4,28 @@ This repository hosts a high-performance, **distributed implementation** of **Co
 
 The core design separates I/O and visualization (Local Controller) from the primary computational load (AWS Nodes/Workers).
 
+## 🔍 Overview
+
+**Distributed-GameOfLife-Go** is a fully parallel, distributed implementation of  
+**Conway’s Game of Life**, designed for high-performance simulations running across
+multiple machines or cloud nodes (e.g., AWS EC2).
+
+The system is architected around a **three-layer distributed model**:
+
+- **Local Controller** — handles visualization, PGM I/O, keyboard events  
+- **Broker / Distributor** — coordinates work, splits the board into slices  
+- **Worker Nodes** — compute next-generation slices using halo exchange  
+
+This separation ensures:
+
+- Extremely scalable performance  
+- Modular component replacement  
+- Low coupling between visualization and computation  
+- High fault tolerance (workers can join/leave dynamically)
+
+The architecture enables real-time visualization, efficient PGM save/load operations,
+and clean RPC-based communication between all components.
+
 ## 📝 Final Coursework Report
 
 The full detailed analysis of the parallel implementation, including performance benchmarks and design rationale, is available in the final report.
