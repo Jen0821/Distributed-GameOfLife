@@ -1,8 +1,8 @@
-# 🚀 Go-Distributed-GameOfLife
+## 🚀 Go-Distributed-GameOfLife
 
-This project implements **Conway's Game of Life** as a **highly scalable, distributed system** using **Go (Golang)**. [cite\_start]The primary focus is on achieving **high-performance simulation** across multiple machines using a **Controller/Server/Worker** architecture and Go's native support for network communication via **RPC (Remote Procedure Call)**[cite: 113, 114, 128].
+This project implements **Conway's Game of Life** as a **highly scalable, distributed system** using **Go (Golang)**. The primary focus is on achieving **high-performance simulation** across multiple machines using a **Controller/Server/Worker** architecture and Go's native support for network communication via **RPC (Remote Procedure Call)**.
 
-[cite\_start]This system is designed to distribute the computational load of large-scale grids across several independent nodes (simulated **AWS Nodes**)[cite: 115, 127], demonstrating exceptional horizontal scalability.
+This system is designed to distribute the computational load of large-scale grids across several independent nodes (simulated **AWS Nodes**), demonstrating exceptional horizontal scalability.
 
 ## Overview
 
@@ -13,77 +13,70 @@ Conway's Game of Life is a zero-player game whose evolution is determined solely
 3.  Any live cell with more than three live neighbours dies, as if by overpopulation.
 4.  Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 
-[cite\_start]This project's implementation focuses on distributing these intense computations across multiple remote nodes using the Controller/Server/Worker model to break through the computing power bottleneck of a single machine[cite: 127].
-
------
+This project's implementation focuses on distributing these intense computations across multiple remote nodes using the Controller/Server/Worker model to break through the computing power bottleneck of a single machine.
 
 ## 📝 Final Coursework Report
 
 The full detailed analysis of the distributed implementation, including performance benchmarks and design rationale, is available in the final report.
 
-[](https://www.google.com/search?q=./report.pdf)
-
+[![Report Cover Image: Click to Download PDF](./report.jpg)](./report.pdf)
 ### Direct Link
 
 [Download the Full PDF Report Here](https://www.google.com/search?q=./report.pdf)
 
------
-
 ## 💡 System Architecture: Controller-Server-Worker
 
-[cite\_start]The simulation logic is split into two primary, network-connected parts—the **Local Controller** and the **Remote Engine (Server)**—to maximize performance and scalability[cite: 126].
+![Architecture Diagram](architecture.png)
+
+The simulation logic is split into three main, network-connected components—the **Local Controller** and the **Remote Engine (Server/Worker)**—to maximize performance and scalability.
 
 | Component | Role in Distributed System | Key Technologies |
 | :--- | :--- | :--- |
-| **Local Controller (Distributor/Client)** | [cite\_start]Orchestrates the system, handles user input/visualization (SDL), initiates **RPC calls** to remote Workers, collects calculation results, and merges them into the global world state[cite: 125, 130, 139]. | Go, SDL, RPC Client |
-| **Engine (Remote Server)** | [cite\_start]Deployed on **AWS nodes**[cite: 115, 127]. [cite\_start]Receives RPC requests, holds the core GOL calculation functionality (`DoWork{}`) [cite: 119, 120][cite\_start], and returns the results[cite: 130]. | [cite\_start]Go, RPC Server/Client, `RunServer` [cite: 129] |
-| **GOL Worker (Compute Logic)** | The calculation logic within the Engine. [cite\_start]It calculates the GOL logic for its assigned board **slice (shard)**[cite: 150]. | Go, Goroutines (internal parallelism) |
+| **Local Controller (Distributor/Client)** | **Orchestrates the system**, handles user input/visualization (SDL), initiates **RPC calls** to remote Workers, collects calculation results, and **aggregates them** into the global world state. | Go, SDL, RPC Client |
+| **Engine (Remote Server)** | Deployed on **AWS nodes**. Receives RPC requests via **`RunServer`**, holds the core GOL calculation logic (`DoWork`), and returns the results. | Go, RPC Server/Client, Goroutines |
+| **GOL Worker (Compute Logic)** | The calculation logic within the Engine. It calculates the GOL logic for its assigned board **slice (shard)** using **Goroutines** for internal parallelism. | Go, Goroutines (internal parallelism) |
 
-> [cite\_start]**Note on Broker:** The construction of an ideal **Broker** component (managing node status, allocating tasks to idle Workers, and aggregating results) was attempted but not completed[cite: 164, 166, 167, 168]. The **Local Controller** currently handles the scheduling and aggregation roles.
-
------
+> **Note on Broker Role:** In the current implementation, the **Local Controller** handles the scheduling and result aggregation roles. A dedicated Broker component for managing worker pools and fault tolerance was part of the original design but is functionally handled by the Controller.
 
 ## 🌟 Key Features & Implementation Highlights
 
 ### 1\. High-Performance Distributed Core
 
-  * [cite\_start]**RPC Communication:** All communication between the Controller and the Server is handled via **RPC (Remote Procedure Call)** [cite: 128][cite\_start], which enables multi-machine collaboration via network transmission[cite: 131].
-  * [cite\_start]**Workload Partitioning:** The world is divided evenly by `ImageHeight` into multiple regions (**shards**), and each Worker solves the calculation for its assigned row shard[cite: 149, 150]. [cite\_start]This simplifies parameter transmission[cite: 151].
-  * [cite\_start]**Halo Data Transmission:** The **Halo (boundary data)** (`HaloUpper`, `HaloLower`) is explicitly defined and sent from the Controller to the Workers with each request to solve the problem of boundary cells missing neighboring rows from adjacent shards[cite: 181, 182, 183].
-  * **RPC Structures:** Communication uses defined RPC structures:
-      * [cite\_start]**`WorkerRequest`:** Carries initial parameters from the Controller to the Worker (e.g., `StartY`, `Height`, `World`, `HaloUpper`, `HaloLower`)[cite: 155, 156, 122].
-      * [cite\_start]**`WorkerResponse`:** Holds the calculation results from the Worker, returning the calculated area status through `Result[][]byte`[cite: 122, 158].
+  * **RPC Communication:** All communication between the Controller and the Server is handled via **RPC (Remote Procedure Call)**, ensuring reliable command and data transfer over the network.
+  * **Workload Partitioning:** The global board is divided evenly by `ImageHeight` into multiple regions (**shards**), and each remote Server/Worker calculates its assigned row shard.
+  * **Halo Data Transmission:** To correctly compute boundary cells, the **Halo (boundary data)** (`HaloUpper`, `HaloLower`) is explicitly defined and sent from the Controller to the Workers with each request. This prevents complex neighbour communication between remote Workers, simplifying the design.
+  * **RPC Structures:** Communication relies on defined RPC structures:
+      * **`WorkerRequest`:** Carries initial parameters (e.g., `StartY`, `Height`, `World`, `HaloUpper`, `HaloLower`) from the Controller to the Worker.
+      * **`WorkerResponse`:** Holds the calculated results from the Worker, returning the calculated area status through `Result[][]byte`.
 
 ### 2\. Solved Implementation Challenges
 
-The following challenges were overcome during development:
+The core distributed architecture was successfully established within the **`StartDistributed{}`** function in the distributor:
 
-  * [cite\_start]**Controller-Server Connection:** The core distributed implementation was built within the **`StartDistributed{}`** function in the distributor, allowing the Controller to successfully connect to remote Workers using `rpc.Dial` and `client.call()`[cite: 176, 178].
-  * [cite\_start]**Boundary Cell Dependency:** The issue of boundary cells missing neighboring rows was solved by transmitting the **`HaloUpper`** and **`HaloLower`** data with the initial shard information for every turn's calculation[cite: 181, 182, 183].
+  * **Controller-Server Connection:** The Controller successfully connects to remote Servers using `rpc.Dial` and executes remote functions via `client.call()`.
+  * **Boundary Cell Dependency:** The issue of boundary cells missing neighbouring rows was solved by embedding the **`HaloUpper`** and **`HaloLower`** data within the `WorkerRequest` for every turn's calculation.
 
 ### 3\. State Management & Real-Time Events
 
   * **Toroidal Boundary Conditions:** Implements **Closed Domain (Toroidal)** boundary conditions.
-  * [cite\_start]**Event-Driven Reporting:** The Controller receives the number of surviving cells from the Worker for event notification[cite: 161].
+  * **Event-Driven Reporting:** The Controller receives the aggregated number of surviving cells from the Workers for real-time notification.
   * **PGM I/O:** Uses the **PGM (Portable Graymap)** image format for loading initial states and saving final/intermediate states.
 
 ### 4\. Interactive User Control
 
-[cite\_start]Interactive keyboard commands are processed by the Local Controller and transmitted as RPC commands to the remote Server/Engine[cite: 125, 162]:
+Interactive keyboard commands are processed by the Local Controller and transmitted as RPC commands to the remote Server/Engine:
 
   * **`s` (Save):** Commands the remote system to save the current simulation state as a PGM image.
   * **`q` (Quit):** Gracefully terminates the system and triggers the final PGM image output.
-  * **`p` (Pause/Resume):** Toggles the processing state on the remote Worker nodes.
-
------
+  * **`p` (Pause/Resume):** Toggles the processing state on the remote Server/Worker nodes.
 
 ## 📈 Performance and Scalability
 
-The distributed architecture is optimized for **horizontal scaling**. [cite\_start]Benchmarks were conducted on a 20-core Linux machine [cite: 184] using a $512 \times 512$ grid over 1000 turns.
+The distributed architecture is optimized for **horizontal scaling**. Benchmarks were conducted on a 20-core Linux machine using a $512 \times 512$ grid over 1000 turns.
 
-  * [cite\_start]**Network Overhead:** Initially, the running time **significantly increased** compared to the parallel implementation due to the time loss caused by calling remote Workers (network latency)[cite: 190, 191].
-  * [cite\_start]**Scaling Proof:** As the number of Workers increased, the running time for completing the Life Game **significantly decreased**[cite: 192].
-  * [cite\_start]**Stabilization:** As the number of Workers continued to increase, the improvement in running time became smaller and eventually stabilized[cite: 193].
+  * **Network Overhead:** Initially, running time **significantly increased** compared to the single-machine parallel implementation due to the time loss caused by calling remote Workers (network latency).
+  * **Scaling Proof:** As the number of Workers increased, the running time for completing the Life Game **significantly decreased**, confirming the effectiveness of horizontal distribution.
+  * **Stabilisation:** As the number of Workers continued to increase, the improvement in running time became smaller and eventually **stabilised** due to increasing network and aggregation overhead.
 
 The chart below illustrates the speedup achieved by distributing the workload:
 
@@ -98,13 +91,11 @@ The chart below illustrates the speedup achieved by distributing the workload:
 
 ### Potential Faults
 
-[cite\_start]The design acknowledges potential fault scenarios that can occur in a distributed system[cite: 209]:
+The design considers potential fault scenarios inherent to distributed systems:
 
-  * [cite\_start]**Network Interruption:** If the network connection is interrupted, the RPC requests or responses will fail, making the system unable to continue calculating and aggregating the next state[cite: 210, 211].
-  * [cite\_start]**Worker Anomaly:** If a Worker experiences an anomaly, the local server will lack the states of certain shards, resulting in errors in the aggregation of the global GOL state[cite: 212].
-  * [cite\_start]**Controller Crash:** If the local server (Controller) crashes, the current world state cannot be saved, and recovery may require starting from the initial state[cite: 213].
-
------
+  * **Network Interruption:** If the network connection is interrupted, the RPC requests or responses will fail, making the system unable to continue calculating and aggregating the next state.
+  * **Worker Anomaly:** If a Worker experiences anomalies, the local server will lack the states of certain shards, resulting in errors in the aggregation of the global GOL state.
+  * **Controller Crash:** If the local server (Controller) suddenly crashes, the current world state cannot be saved, and recovery may require starting from the initial state.
 
 ## ▶️ Setup
 
