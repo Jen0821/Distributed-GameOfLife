@@ -1,129 +1,117 @@
 # 🌐 Go-Distributed-GameOfLife: Scalable GOL Engine
 
-This repository hosts a high-performance, **distributed implementation** of **Conway's Game of Life (GoL)**. Built entirely in **Go (Golang)**, the system leverages an asynchronous, network-based architecture using **Remote Procedure Calls (RPC)** to distribute computation across multiple machines (simulated as AWS nodes), achieving massive scalability for large grid simulations.
+This project implements **Conway's Game of Life** as a **highly scalable, distributed system** using **Go (Golang)**. The primary focus is on achieving **high-performance simulation** across multiple machines using a **Controller/Broker/Worker** architecture and Go's native support for network communication via **RPC (Remote Procedure Call)**.
 
-The core design separates I/O and visualization (Local Controller) from the primary computational load (AWS Nodes/Workers).
+This system is designed to distribute the computational load of large-scale grids across several independent nodes (simulated **AWS Nodes**), demonstrating exceptional horizontal scalability.
 
-## 🔍 Overview
+---
 
-**Distributed-GameOfLife-Go** is a fully parallel, distributed implementation of  
-**Conway’s Game of Life**, designed for high-performance simulations running across
-multiple machines or cloud nodes (e.g., AWS EC2).
+## Overview
 
-The system is architected around a **three-layer distributed model**:
+Conway's Game of Life is a zero-player game whose evolution is determined solely by its initial state. The grid of cells evolves based on simple, local rules:
 
-- **Local Controller** — handles visualization, PGM I/O, keyboard events  
-- **Broker / Distributor** — coordinates work, splits the board into slices  
-- **Worker Nodes** — compute next-generation slices using halo exchange  
+1.  Any live cell with fewer than two live neighbours dies, as if by underpopulation.
+2.  Any live cell with two or three live neighbours lives on to the next generation.
+3.  Any live cell with more than three live neighbours dies, as if by overpopulation.
+4.  Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 
-This separation ensures:
+This project's implementation focuses on distributing these intense computations across multiple remote nodes using the Controller/Broker/Worker model to achieve massive scalability.
 
-- Extremely scalable performance  
-- Modular component replacement  
-- Low coupling between visualization and computation  
-- High fault tolerance (workers can join/leave dynamically)
+---
 
-The architecture enables real-time visualization, efficient PGM save/load operations,
-and clean RPC-based communication between all components.
+## 💡 System Architecture: Controller-Broker-Worker
 
-## 📝 Final Coursework Report
+The simulation logic is split into three main, network-connected components to maximize performance and fault tolerance potential.
 
-The full detailed analysis of the parallel implementation, including performance benchmarks and design rationale, is available in the final report.
 
-[![Report Cover Image: Click to Download PDF](./report.jpg)](./report.pdf)
-### Direct Link
-[Download the Full PDF Report Here](./report.pdf)
 
-## ✨ Distributed System Architecture
+| Component | Role in Distributed System | Key Technologies |
+| :--- | :--- | :--- |
+| **Local Controller (Client/UI)** | Responsible for user input, **SDL** real-time visualization, sending RPC commands, and receiving events from the Broker. | Go, SDL, RPC Client |
+| **Broker (Server/Orchestrator)** | Central management point. Manages the Worker node pool, handles board slicing/distribution, and aggregates results (Aggregation) from Workers. | Go, RPC Server/Client |
+| **GOL Worker (Compute Node)** | Calculates the GOL logic for its assigned board slice. Uses **Goroutines** for internal parallelism and exchanges boundary data (**Halo**) with neighboring Workers. | Go, Goroutines, RPC Client |
 
-The project follows a three-tier distributed model designed for clarity, scalability, and workload separation:
+---
 
-1. **Local Controller (Client):**  
-   Handles user I/O (PGM load/save, SDL visualization, and keypresses).  
-   Sends commands to the **Broker** via RPC.
+## 🌟 Key Features & Implementation Highlights
 
-2. **Broker / Distributor (Central Server):**  
-   Acts as the system orchestrator.  
-   Receives commands from the Controller, splits the global board into slices, and sends work to Workers.  
-   Contains **no game logic**.
+### 1. High-Performance Distributed Core
+* **RPC Communication:** All communication between components (Controller, Broker, Worker) is handled via **RPC (Remote Procedure Call)**, ensuring reliable command and data transfer over the network.
+* **Efficient Workload Partitioning:** The Broker slices the global board horizontally and assigns sections to Worker nodes. **Halo Exchange** is used to efficiently communicate only the boundary cell information between neighbors, minimizing network overhead.
+* **Internal Parallelism:** Each Worker node utilizes Go's **Goroutines** internally for fast, local parallel computation on its assigned board slice.
 
-3. **GOL Worker (Compute Node):**  
-   Runs on separate machines (AWS nodes / terminals).  
-   Computes the next state for a given board slice.  
-   Uses **Halo Exchange** to safely exchange boundary rows with neighboring Workers.
+### 2. State Management & Real-Time Events
+* **Toroidal Boundary Conditions:** Implements **Closed Domain (Toroidal)** boundary conditions, where opposite edges of the board are connected.
+* **Event-Driven Reporting:**
+    * **Alive Count Ticker:** Reports the total number of alive cells to the Controller every **2 seconds** via an RPC call.
+    * **State Change Events:** Utilizes `CellFlipped` and `TurnComplete` events for efficient real-time visualization updates.
+* **PGM I/O:** Uses the **PGM (Portable Graymap)** image format for loading initial states and saving final/intermediate states.
 
-### 📊 Architecture Diagram
+### 3. Interactive User Control
+Interactive keyboard commands are processed by the Local Controller and sent as RPC commands to the distributed system:
+* **`s` (Save):** Commands the remote system to save the current simulation state as a PGM image.
+* **`q` (Quit):** Gracefully terminates the Controller client and triggers the final PGM image output.
+* **`p` (Pause/Resume):** Toggles the processing state on the remote Worker nodes.
 
-![Distributed GOL Architecture](./architecture.png)
+---
 
-## ⚙️ Running the Distributed System
+## 📈 Performance and Scalability
 
-This system requires launching the components in the following order: **Broker → Workers → Controller**.
+This architecture is optimized for **horizontal scaling**. The final report's benchmarks illustrate key performance characteristics:
+
+* **Scalability Proof:** The time required to complete a fixed number of turns **significantly decreases** as the number of Worker nodes increases, demonstrating the effectiveness of the distributed approach.
+* **Overhead Analysis:** The performance gain eventually plateaus due to the increasing overhead of network communication and Broker aggregation.
+* **Fault Consideration:** The design considers potential fault scenarios, such as handling a new Controller taking over the session or a Worker Node failing.
+
+---
+
+## ▶️ Setup and Running
 
 ### Prerequisites
 
-- Go (Golang) installed  
-- SDL2 development libraries (only for visualization on the Controller)
+* **Go (Golang)** must be installed and configured.
+* **SDL Development Libraries** are required for the Local Controller's visualization component.
 
-## 🔌 Execution Sequence
+| OS | Installation Command | Notes |
+| :--- | :--- | :--- |
+| **macOS (Homebrew)** | `brew install sdl2` | |
+| **Linux (Ubuntu/Debian)** | `sudo apt-get install libsdl2-dev` | |
+| **Windows** | *Requires MinGW installation and manual SDL2 linking. Refer to the Go SDL documentation for detailed platform-specific setup.* | |
 
-### 1. Start the Broker / Distributor
+## ▶️ Setup and Running
 
-The Broker listens for RPC calls from both the Controller and Worker nodes.
+### **Prerequisites**
+Install Go and SDL development libraries.
 
+### macOS (Homebrew)
 ```bash
-# Start the Broker on a specified port (e.g., 8080)
-go run ./broker -listen :8080
+brew install sdl2
 ```
 
-### 2. Start the GOL Worker Nodes
-
-Each Worker connects to the Broker and waits for assigned board slices.  
-Start as many Workers as you want (more Workers = more parallelism).
-
+### Linux (Ubuntu/Debian)
 ```bash
-# Start Worker 1
-go run ./worker -broker-addr :8080 -worker-id 1
-
-# Start Worker 2 (different machine/terminal)
-go run ./worker -broker-addr :8080 -worker-id 2
-
-# ... and so on for N workers
+sudo apt-get install libsdl2-dev
 ```
 
-### 3. Start the Local Controller (Client / I/O)
-
-The Local Controller manages SDL display, PGM save/load, and user key input.  
-Use the `-headless` flag for performance testing without rendering.
-
+### Windows
 ```bash
-# Start the Controller connected to the Broker
-go run ./controller -broker-addr :8080 -headless -t 4
+# Requires MinGW installation and manual SDL2 linking
+# Refer to the Go SDL documentation for detailed platform-specific setup
 ```
 
-## 🕹️ Interactive Controls (Controller)
+## 🚀 Running
 
-| Key | Action | Description |
-|-----|--------|-------------|
-| **s** | Save State | Broker assembles the global board and writes a PGM image |
-| **p** | Pause / Resume | Toggles simulation updates while preserving control commands |
-| **q** | Quit Client | Controller exits gracefully and outputs final PGM |
-| **k** | System Kill | Gracefully shuts down Controller, Broker, and all Workers |
-
-## ✅ Testing
-
-Comprehensive unit tests ensure correctness, race-safety, and image assembly validation.
-
+### Run the program (Controller/Broker/Workers assumed running or mocked)
 ```bash
-# Test the distributed evolution logic
-go test ./tests -v -run TestGol/-1\$
+go run .
+```
 
-# Verify PGM output/assembly correctness
-go test ./tests -v -run TestPgm/-1\$
+### Test visualization + keyboard controls
+```bash
+go test ./tests -v -run TestKeyboard -sdl
+```
 
-# Check alive cell count reporting via RPC
-go test ./tests -v -run TestAlive
-
-# Run race condition detector (internal concurrency)
+### Test parallel core with race detector
+```bash
 go test ./tests -v -race
 ```
