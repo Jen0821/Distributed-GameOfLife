@@ -65,19 +65,6 @@ This architecture is optimized for **horizontal scaling**. The final report's be
 
 ## ▶️ Setup and Running
 
-### Prerequisites
-
-* **Go (Golang)** must be installed and configured.
-* **SDL Development Libraries** are required for the Local Controller's visualization component.
-
-| OS | Installation Command | Notes |
-| :--- | :--- | :--- |
-| **macOS (Homebrew)** | `brew install sdl2` | |
-| **Linux (Ubuntu/Debian)** | `sudo apt-get install libsdl2-dev` | |
-| **Windows** | *Requires MinGW installation and manual SDL2 linking. Refer to the Go SDL documentation for detailed platform-specific setup.* | |
-
-## ▶️ Setup and Running
-
 ### **Prerequisites**
 Install Go and SDL development libraries.
 
