@@ -18,50 +18,104 @@ The full detailed analysis of the parallel implementation, including performance
 
 ## ✨ Distributed System Architecture
 
-The project is structured around a three-tier model to handle tasks, communication, and computation:
+The project follows a three-tier distributed model designed for clarity, scalability, and workload separation:
 
-1.  **Local Controller (Client):** Handles user I/O (PGM load/save, SDL visualization, Keypresses). It sends commands to the **Broker** via RPC.
-2.  **Broker / Distributor (Central Server):** The orchestrator. It receives commands, divides the game board into slices, and delegates tasks to the **Workers**. It does **not** contain any Game of Life evolution logic.
-3.  **GOL Worker (Compute Node):** Runs on separate machines (AWS nodes). It receives a board slice, calculates the next state, and returns the result. It employs **Halo Exchange** (communicating border rows/columns with neighbors) to maintain calculation correctness efficiently.
+1. **Local Controller (Client):**  
+   Handles user I/O (PGM load/save, SDL visualization, and keypresses).  
+   Sends commands to the **Broker** via RPC.
+
+2. **Broker / Distributor (Central Server):**  
+   Acts as the system orchestrator.  
+   Receives commands from the Controller, splits the global board into slices, and sends work to Workers.  
+   Contains **no game logic**.
+
+3. **GOL Worker (Compute Node):**  
+   Runs on separate machines (AWS nodes / terminals).  
+   Computes the next state for a given board slice.  
+   Uses **Halo Exchange** to safely exchange boundary rows with neighboring Workers.
 
 ---
 
 ## ⚙️ Running the Distributed System
 
-This project requires simultaneous execution of the Broker, one or more Workers, and the Local Controller.
+This system requires launching the components in the following order: **Broker → Workers → Controller**.
 
 ### Prerequisites
 
-* Go (Golang) installed.
-* SDL2 development libraries installed (for visualization on the Controller).
+- Go (Golang) installed  
+- SDL2 development libraries (only for visualization on the Controller)
 
-### Execution Sequence
+---
 
-The components must be started in the following order:
+## 🔌 Execution Sequence
 
-#### 1. Start the Broker / Distributor (Central Server)
+### 1. Start the Broker / Distributor
 
-This component listens for RPC requests from both the Controller and the Workers.
+The Broker listens for RPC calls from both the Controller and Worker nodes.
 
 ```bash
 # Start the Broker on a specified port (e.g., 8080)
 go run ./broker -listen :8080
+```
 
-#### 2. Start the GOL Worker Nodes
+---
 
-These instances connect to the Broker and wait for work slices. Start as many instances as desired for parallel computation.
+### 2. Start the GOL Worker Nodes
 
-# Start Worker 1 (connected to Broker at :8080)
+Each Worker connects to the Broker and waits for assigned board slices.  
+Start as many Workers as you want (more Workers = more parallelism).
+
+```bash
+# Start Worker 1
 go run ./worker -broker-addr :8080 -worker-id 1
 
-# Start Worker 2 (on a different machine/terminal)
+# Start Worker 2 (different machine/terminal)
 go run ./worker -broker-addr :8080 -worker-id 2
 
 # ... and so on for N workers
+```
 
-#### 3. Start the Local Controller (Client/I/O)
+---
 
-This controls the entire simulation. Use the -headless flag to disable SDL visualization for performance testing.
+### 3. Start the Local Controller (Client / I/O)
 
-# Start the Controller, connecting to the Broker and initiating the simulation
+The Local Controller manages SDL display, PGM save/load, and user key input.  
+Use the `-headless` flag for performance testing without rendering.
+
+```bash
+# Start the Controller connected to the Broker
 go run ./controller -broker-addr :8080 -headless -t 4
+```
+
+---
+
+## 🕹️ Interactive Controls (Controller)
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| **s** | Save State | Broker assembles the global board and writes a PGM image |
+| **p** | Pause / Resume | Toggles simulation updates while preserving control commands |
+| **q** | Quit Client | Controller exits gracefully and outputs final PGM |
+| **k** | System Kill | Gracefully shuts down Controller, Broker, and all Workers |
+
+---
+
+## ✅ Testing
+
+Comprehensive unit tests ensure correctness, race-safety, and image assembly validation.
+
+```bash
+# Test the distributed evolution logic
+go test ./tests -v -run TestGol/-1\$
+
+# Verify PGM output/assembly correctness
+go test ./tests -v -run TestPgm/-1\$
+
+# Check alive cell count reporting via RPC
+go test ./tests -v -run TestAlive
+
+# Run race condition detector (internal concurrency)
+go test ./tests -v -race
+```
+
+---
