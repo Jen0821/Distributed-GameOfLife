@@ -34,6 +34,10 @@ The project follows a three-tier distributed model designed for clarity, scalabi
    Computes the next state for a given board slice.  
    Uses **Halo Exchange** to safely exchange boundary rows with neighboring Workers.
 
+### 📊 Architecture Diagram
+
+![Distributed GOL Architecture](./architecture.png)
+
 ---
 
 ## ⚙️ Running the Distributed System
