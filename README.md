@@ -84,7 +84,7 @@ sudo apt-get install libsdl2-dev
 # Refer to the Go SDL documentation for detailed platform-specific setup
 ```
 
-## 🚀 Running
+## 🚀 Running and Testing
 
 ### Run the program (Controller/Broker/Workers assumed running or mocked)
 ```bash
