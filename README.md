@@ -4,8 +4,6 @@ This repository hosts a high-performance, **distributed implementation** of **Co
 
 The core design separates I/O and visualization (Local Controller) from the primary computational load (AWS Nodes/Workers).
 
----
-
 ## 📝 Final Coursework Report
 
 The full detailed analysis of the parallel implementation, including performance benchmarks and design rationale, is available in the final report.
@@ -13,8 +11,6 @@ The full detailed analysis of the parallel implementation, including performance
 [![Report Cover Image: Click to Download PDF](./report.jpg)](./report.pdf)
 ### Direct Link
 [Download the Full PDF Report Here](./report.pdf)
-
----
 
 ## ✨ Distributed System Architecture
 
@@ -38,8 +34,6 @@ The project follows a three-tier distributed model designed for clarity, scalabi
 
 ![Distributed GOL Architecture](./architecture.png)
 
----
-
 ## ⚙️ Running the Distributed System
 
 This system requires launching the components in the following order: **Broker → Workers → Controller**.
@@ -48,8 +42,6 @@ This system requires launching the components in the following order: **Broker �
 
 - Go (Golang) installed  
 - SDL2 development libraries (only for visualization on the Controller)
-
----
 
 ## 🔌 Execution Sequence
 
@@ -61,8 +53,6 @@ The Broker listens for RPC calls from both the Controller and Worker nodes.
 # Start the Broker on a specified port (e.g., 8080)
 go run ./broker -listen :8080
 ```
-
----
 
 ### 2. Start the GOL Worker Nodes
 
@@ -79,8 +69,6 @@ go run ./worker -broker-addr :8080 -worker-id 2
 # ... and so on for N workers
 ```
 
----
-
 ### 3. Start the Local Controller (Client / I/O)
 
 The Local Controller manages SDL display, PGM save/load, and user key input.  
@@ -91,8 +79,6 @@ Use the `-headless` flag for performance testing without rendering.
 go run ./controller -broker-addr :8080 -headless -t 4
 ```
 
----
-
 ## 🕹️ Interactive Controls (Controller)
 
 | Key | Action | Description |
@@ -101,8 +87,6 @@ go run ./controller -broker-addr :8080 -headless -t 4
 | **p** | Pause / Resume | Toggles simulation updates while preserving control commands |
 | **q** | Quit Client | Controller exits gracefully and outputs final PGM |
 | **k** | System Kill | Gracefully shuts down Controller, Broker, and all Workers |
-
----
 
 ## ✅ Testing
 
@@ -121,5 +105,3 @@ go test ./tests -v -run TestAlive
 # Run race condition detector (internal concurrency)
 go test ./tests -v -race
 ```
-
----
