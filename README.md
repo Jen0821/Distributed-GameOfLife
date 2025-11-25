@@ -1,4 +1,4 @@
-# 🌐 Distributed-GameOfLife-Go: Scalable GOL Engine
+# 🌐 Go-Distributed-GameOfLife: Scalable GOL Engine (Conway's Game of Life Parallel Implementation)
 
 This repository hosts a high-performance, **distributed implementation** of **Conway's Game of Life (GoL)**. Built entirely in **Go (Golang)**, the system leverages an asynchronous, network-based architecture using **Remote Procedure Calls (RPC)** to distribute computation across multiple machines (simulated as AWS nodes), achieving massive scalability for large grid simulations.
 
