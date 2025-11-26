@@ -19,15 +19,19 @@ This project's implementation focuses on distributing these intense computations
 
 The full detailed analysis of the distributed implementation, including performance benchmarks and design rationale, is available in the final report.
 
-[![Report Preview](https://github.com/Jen0821/Distributed-GameOfLife/blob/main/report.jpg)](https://github.com/Jen0821/Distributed-GameOfLife/blob/main/report.pdf)
+[](https://github.com/Jen0821/Distributed-GameOfLife/blob/main/report.pdf)
 
 **Click the image to view the full report.**
 
 ## 💡 System Architecture: Controller-Server-Worker
 
-![Architecture Diagram](architecture.png)
-
 The simulation logic is split into three main, network-connected components—the **Local Controller** and the **Remote Engine (Server/Worker)**—to maximize performance and scalability.
+
+### Overall Distributed System Architecture
+
+This diagram illustrates the full distributed setup, showing the **Local Controller** managing **I/O** and **SDL** locally, and communicating with the **GOL Workers** hosted on remote **AWS Nodes** via a dotted line representing the network connection.
+
+[Image: cw\_diagrams-Distributed\_5.DUKVZY2Y.png]
 
 | Component | Role in Distributed System | Key Technologies |
 | :--- | :--- | :--- |
@@ -48,26 +52,28 @@ The simulation logic is split into three main, network-connected components—th
       * **`WorkerRequest`:** Carries initial parameters (e.g., `StartY`, `Height`, `World`, `HaloUpper`, `HaloLower`) from the Controller to the Worker.
       * **`WorkerResponse`:** Holds the calculated results from the Worker, returning the calculated area status through `Result[][]byte`.
 
-### 2\. Solved Implementation Challenges
+### 2\. Event-Driven Control and Reporting
+
+The Local Controller manages all inputs and outputs via dedicated Goroutines and an event-driven model.
+
+#### Controller and SDL Visualization Flow
+
+The Controller orchestrates real-time feedback and user interaction via the SDL component, handling keypresses and dispatching various events such as `AliveCellsCount` (for real-time metrics) and `StateChange` (for pause/resume).
+
+[Image: cw\_diagrams-Distributed\_4.Bze9Yo33.png]
+
+#### I/O and PGM Output
+
+The dedicated I/O component handles all file reading and writing (PGM format), communicating with the Controller using specific commands and providing output for testing.
+
+[Image: cw\_diagrams-Distributed\_3.C\_MGcuwb.png]
+
+### 3\. Solved Implementation Challenges
 
 The core distributed architecture was successfully established within the **`StartDistributed{}`** function in the distributor:
 
   * **Controller-Server Connection:** The Controller successfully connects to remote Servers using `rpc.Dial` and executes remote functions via `client.call()`.
   * **Boundary Cell Dependency:** The issue of boundary cells missing neighbouring rows was solved by embedding the **`HaloUpper`** and **`HaloLower`** data within the `WorkerRequest` for every turn's calculation.
-
-### 3\. State Management & Real-Time Events
-
-  * **Toroidal Boundary Conditions:** Implements **Closed Domain (Toroidal)** boundary conditions.
-  * **Event-Driven Reporting:** The Controller receives the aggregated number of surviving cells from the Workers for real-time notification.
-  * **PGM I/O:** Uses the **PGM (Portable Graymap)** image format for loading initial states and saving final/intermediate states.
-
-### 4\. Interactive User Control
-
-Interactive keyboard commands are processed by the Local Controller and transmitted as RPC commands to the remote Server/Engine:
-
-  * **`s` (Save):** Commands the remote system to save the current simulation state as a PGM image.
-  * **`q` (Quit):** Gracefully terminates the system and triggers the final PGM image output.
-  * **`p` (Pause/Resume):** Toggles the processing state on the remote Server/Worker nodes.
 
 ## 📈 Performance and Scalability
 
@@ -88,13 +94,17 @@ The chart below illustrates the speedup achieved by distributing the workload:
 | 5 | \~55 |
 | 6 | \~45 |
 
-### Potential Faults
+### Initial State Example
 
-The design considers potential fault scenarios inherent to distributed systems:
+The simulation starts from an initial PGM image representing the live and dead cells on the grid.
 
-  * **Network Interruption:** If the network connection is interrupted, the RPC requests or responses will fail, making the system unable to continue calculating and aggregating the next state.
-  * **Worker Anomaly:** If a Worker experiences anomalies, the local server will lack the states of certain shards, resulting in errors in the aggregation of the global GOL state.
-  * **Controller Crash:** If the local server (Controller) suddenly crashes, the current world state cannot be saved, and recovery may require starting from the initial state.
+[Image: Initial PGM image file name here]
+
+### Real-Time Visualisation Example
+
+This shows the simulation running in real-time via the SDL window.
+
+[Image: SDL Visualization image file name here]
 
 ## ▶️ Setup
 
