@@ -39,7 +39,7 @@ This diagram illustrates the full distributed setup, showing the **Local Control
 | **Engine (Remote Server)** | Deployed on **AWS nodes**. Receives RPC requests via **`RunServer`**, holds the core GOL calculation logic (`DoWork`), and returns the results. | Go, RPC Server/Client, Goroutines |
 | **GOL Worker (Compute Logic)** | The calculation logic within the Engine. It calculates the GOL logic for its assigned board **slice (shard)** using **Goroutines** for internal parallelism. | Go, Goroutines (internal parallelism) |
 
-> **Note on Broker Role:** In the current implementation, the **Local Controller** handles the scheduling and result aggregation roles. A dedicated Broker component for managing worker pools and fault tolerance was part of the original design but is functionally handled by the Controller.
+> **Note on Broker Role:** In the current implementation, the **Local Controller** handles the scheduling and result aggregation roles. A dedicated Broker component for managing worker pools and fault tolerance was part of the original design, but is functionally handled by the Controller.
 
 ## 🌟 Key Features & Implementation Highlights
 
@@ -56,7 +56,7 @@ This diagram illustrates the full distributed setup, showing the **Local Control
 
 The Local Controller manages all inputs and outputs via dedicated Goroutines and an event-driven model.
 
-#### Controller and SDL Visualization Flow
+#### Controller and SDL Visualisation Flow
 
 The Controller orchestrates real-time feedback and user interaction via the SDL component, handling keypresses and dispatching various events such as `AliveCellsCount` (for real-time metrics) and `StateChange` (for pause/resume).
 
@@ -77,7 +77,7 @@ The core distributed architecture was successfully established within the **`Sta
 
 ## 📈 Performance and Scalability
 
-The distributed architecture is optimized for **horizontal scaling**. Benchmarks were conducted on a 20-core Linux machine using a $512 \times 512$ grid over 1000 turns.
+The distributed architecture is optimised for **horizontal scaling**. Benchmarks were conducted on a 20-core Linux machine using a $512 \times 512$ grid over 1000 turns.
 
   * **Network Overhead:** Initially, running time **significantly increased** compared to the single-machine parallel implementation due to the time loss caused by calling remote Workers (network latency).
   * **Scaling Proof:** As the number of Workers increased, the running time for completing the Life Game **significantly decreased**, confirming the effectiveness of horizontal distribution.
@@ -104,7 +104,7 @@ The simulation starts from an initial PGM image representing the live and dead c
 
 This shows the simulation running in real-time via the SDL window.
 
-[Image: SDL Visualization image file name here]
+[Image: SDL Visualisation image file name here]
 
 ## ▶️ Setup
 
