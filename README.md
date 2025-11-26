@@ -19,8 +19,7 @@ This project's implementation focuses on distributing these intense computations
 
 The full detailed analysis of the distributed implementation, including performance benchmarks and design rationale, is available in the final report.
 
-[![Report Cover Image](./report.jpg)]](https://www.google.com/search?q=./report.pdf)
-
+[![Report Preview](https://github.com/Jen0821/Scotland-Yard-Board-Game/blob/main/preview.jpg)](https://github.com/Jen0821/Scotland-Yard-Board-Game/blob/main/report.pdf)
 **Click the image to view the full report.**
 
 ## 💡 System Architecture: Controller-Server-Worker
