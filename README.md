@@ -20,6 +20,7 @@ This project's implementation focuses on distributing these intense computations
 The full detailed analysis of the distributed implementation, including performance benchmarks and design rationale, is available in the final report.
 
 [![Report Cover Image: Click to Download PDF](./report.jpg)](./report.pdf)
+[![Report Cover Image](./report.jpg)](Download the Full PDF Report Here](https://www.google.com/search?q=./report.pdf)
 ### Direct Link
 
 [Download the Full PDF Report Here](https://www.google.com/search?q=./report.pdf)
