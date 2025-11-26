@@ -31,7 +31,7 @@ The simulation logic is split into three main, network-connected components—th
 
 This diagram illustrates the full distributed setup, showing the **Local Controller** managing **I/O** and **SDL** locally, and communicating with the **GOL Workers** hosted on remote **AWS Nodes** via a dotted line representing the network connection.
 
-[Image: cw\_diagrams-Distributed\_5.DUKVZY2Y.png]
+![Preview](https://github.com/Jen0821/Distributed-GameOfLife/blob/main/diamgram1.jpg)
 
 | Component | Role in Distributed System | Key Technologies |
 | :--- | :--- | :--- |
@@ -60,13 +60,13 @@ The Local Controller manages all inputs and outputs via dedicated Goroutines and
 
 The Controller orchestrates real-time feedback and user interaction via the SDL component, handling keypresses and dispatching various events such as `AliveCellsCount` (for real-time metrics) and `StateChange` (for pause/resume).
 
-[Image: cw\_diagrams-Distributed\_4.Bze9Yo33.png]
+![Preview](https://github.com/Jen0821/Distributed-GameOfLife/blob/main/diamgram2.jpg)
 
 #### I/O and PGM Output
 
 The dedicated I/O component handles all file reading and writing (PGM format), communicating with the Controller using specific commands and providing output for testing.
 
-[Image: cw\_diagrams-Distributed\_3.C\_MGcuwb.png]
+![Preview](https://github.com/Jen0821/Distributed-GameOfLife/blob/main/diamgram3.jpg)
 
 ### 3\. Solved Implementation Challenges
 
