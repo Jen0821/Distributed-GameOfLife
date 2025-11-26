@@ -19,7 +19,7 @@ This project's implementation focuses on distributing these intense computations
 
 The full detailed analysis of the distributed implementation, including performance benchmarks and design rationale, is available in the final report.
 
-[](https://github.com/Jen0821/Distributed-GameOfLife/blob/main/report.pdf)
+[![Report Preview](https://github.com/Jen0821/Distributed-GameOfLife/blob/main/report.jpg)](https://github.com/Jen0821/Distributed-GameOfLife/blob/main/report.pdf)
 
 **Click the image to view the full report.**
 
