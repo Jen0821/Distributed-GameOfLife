@@ -98,13 +98,13 @@ The chart below illustrates the speedup achieved by distributing the workload:
 
 The simulation starts from an initial PGM image representing the live and dead cells on the grid.
 
-[Image: Initial PGM image file name here]
+![Preview](https://github.com/Jen0821/Distributed-GameOfLife/blob/main/Initial-State.jpg)
 
 ### Real-Time Visualisation Example
 
 This shows the simulation running in real-time via the SDL window.
 
-[Image: SDL Visualisation image file name here]
+![Preview](https://github.com/Jen0821/Distributed-GameOfLife/blob/main/SDL-Visualisation.jpg)
 
 ## ▶️ Setup
 
